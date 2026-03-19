@@ -39,6 +39,8 @@ module triscan(
   reg [9:0] right_x;
   reg [9:0] right_err;
 
+  // The state of the triangle scanline rasterizer is determined
+  // by which vertices of the triangle we have already scanned over vertically.
   parameter
     STATE_V1    = 2'b00,
     STATE_V1_V2 = 2'b01,
@@ -64,7 +66,11 @@ module triscan(
   always @(posedge clk, posedge reset) begin
     if (reset) begin
       state <= STATE_CLEAR;
-    end else if (hpos == 640) begin
+      
+    end else if (hpos == 641) begin
+      // During the H-Blank (between rows), we advance both edges to the next row.
+      // We also accumulate the amount of horizontal position error that this causes.
+      // If we hit one of the vertices of the triangle, we have to change state.
       case (state)
         STATE_CLEAR:
           if (vpos+1 == vtx_1_y) begin
@@ -104,9 +110,11 @@ module triscan(
       endcase
     end else begin
       if (left_err[9]) begin
+        // If the position error of the left edge is above the threshold,
+      	// make a step along the X axis and reduce the error accordingly.
         case (state)
           STATE_CLEAR:;
-          STATE_V1: begin
+          STATE_V1, STATE_V1_V3: begin
             left_x <= left_x + sign(edge_12_dx);
             left_err <= left_err + edge_12_dy;
           end
@@ -114,20 +122,14 @@ module triscan(
             left_x <= left_x + sign(edge_23_dx);
             left_err <= left_err + edge_23_dy;
           end
-          STATE_V1_V3: begin
-            left_x <= left_x + sign(edge_12_dx);
-            left_err <= left_err + edge_12_dy;
-          end
         endcase
       end
       if (right_err[9]) begin
+        // If the position error of the right edge is above the threshold,
+      	// make a step along the X axis and reduce the error accordingly.
         case (state)
           STATE_CLEAR:;
-          STATE_V1: begin
-            right_x <= right_x + sign(edge_13_dx);
-            right_err <= right_err + edge_13_dy;
-          end
-          STATE_V1_V2: begin
+          STATE_V1, STATE_V1_V2: begin
             right_x <= right_x + sign(edge_13_dx);
             right_err <= right_err + edge_13_dy;
           end

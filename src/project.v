@@ -22,6 +22,7 @@ module tt_um_tomolt_rasterizer(
   wire reset;
   wire [2:0] rgb;
 
+  // FIXME is this the right way round???
   assign reset = !rst_n;
 
   // TinyVGA PMOD
