@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1773938913" />
+    <testcase name="test_project" classname="test" file="/home/thomas/uni/tapeout/tomolt_tiny_tapeout_ic/test/module_tests/serial_div/test.py" lineno="9" time="0.0019593238830566406" sim_time_ns="200000.0" ratio_time="102076028.23071307" />
+  </testsuite>
+</testsuites>
